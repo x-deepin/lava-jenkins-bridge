@@ -1,5 +1,8 @@
 #!/usr/bin/python -u
+# -*- coding: utf-8 -*-
 
+import urllib2
+import csv
 import sys
 import os
 import xmlrpclib
@@ -34,28 +37,18 @@ def show_output_log(server, id):
             olen=olen+len(out)
             #print "-----------------", olen, md5.new(out).hexdigest()
             print out
-            
+
         if end is None:
             time.sleep(0.5)
 
 
 
-
-def try_get_job_id():
-    try:
-        id=int(os.environ["JOB_ID"])
-        if id != 0:
-            return id
-    except:
-        return 0
-
-def xx():
-    id = try_get_job_id()
+def parse_flags():
+    id=int(os.getenv("JOB_ID", 0))
     if id != 0:
         return id, True
-    
-    if len(sys.argv) < 2:
 
+    if len(sys.argv) < 2:
         return 0, False
 
     submit= sys.argv[1] == "-s"
@@ -68,28 +61,54 @@ def xx():
 def status_is_complete(server, id):
     return server.job_details(id)["status"]=="Complete"
 
+def show_bundle(server, id):
+    result=False
+    try:
+        response=urllib2.urlopen("%s/export" % (server.job_details(id)["_results_link"]))
+        row_format="{:>15}" * 3
+        print row_format.format("test", "count_pass", "count_fail")
+        result=True
+        for row in csv.DictReader(response, delimiter=','):
+            if row["count_fail"] > 0:
+                result = False
+            print row_format.format(row["test"], row["count_pass"], row["count_fail"])
+        return result
+    except Exception as e:
+        print e
+        return result
+
+
 def main():
-    username = "admin"
-    token = "li401l4uy3qjdym7gqjukr1f6lz83jabsbk6ykzgm5wxaq4oagq4cfehfwl6mwze6uhud9q5xmiepr5oxdiu9bp0r45kjhwh8m7dcu2058id04usn3r0e1wr24frafh5"
-    hostname = "lava.deepin.io"
-    hostname="10.0.3.133"
+    username=os.getenv("LAVA_USERNAME", "admin")
+    hostname=os.getenv("LAVA_HOSTNAME", "10.0.3.133")
+    token=os.getenv("LAVA_TOKEN")
+
+    if token == None or hostname == None or username == None:
+        print "Please setup LAVA_USRNAME, LAVA_HOSTNAME, LAVA_TOKEN environment"
+        exit(-1)
+
     server = xmlrpclib.ServerProxy("http://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
-    id, submit = xx()
+    id, submit = parse_flags()
     if id == 0:
         print "Usage: %s [-s] job_id" % sys.argv[0]
         exit(-1)
-     
+
     if submit:
         nid=server.resubmit_job(id)
-        print "submit job %d from %d" % (nid, id)
+        print "Submit job %d from %d" % (nid, id)
+        print "See also http://%s/scheduler/job/%d" % (hostname, id)
         id=nid
 
-    print "see also : http://%s/scheduler/job/%d" % (hostname, id)
+
+
     show_output_log(server, id)
 
-    if not status_is_complete(server, id):
+    if not show_bundle(server, id):
         exit(-1)
-    print "see also : http://%s/scheduler/job/%d" % (hostname, id)
+    print "See also http://%s/scheduler/job/%d" % (hostname, id)
 
+
+open("running", 'a').close()
 main()
+os.remove("running")
