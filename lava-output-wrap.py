@@ -17,9 +17,9 @@ def wait_output(server, id, max_tries, retries=-1):
     try:
         d = server.job_output(id).data
         return d
-    except:
+    except Exception as e:
         time.sleep(1)
-        print "Waiting job %d to run %ds/%ds" % (id, retries, max_tries)
+        print "Waiting job %d to run %ds/%ds (E: %s)" % (id, retries, max_tries, e)
         return wait_output(server, id, max_tries, retries-1)
 
 def show_output_log(server, id):
@@ -69,7 +69,7 @@ def show_bundle(server, id):
         print row_format.format("test", "count_pass", "count_fail")
         result=True
         for row in csv.DictReader(response, delimiter=','):
-            if row["count_fail"] > 0:
+            if int(row["count_fail"]) > 0:
                 result = False
             print row_format.format(row["test"], row["count_pass"], row["count_fail"])
         return result
@@ -80,7 +80,7 @@ def show_bundle(server, id):
 
 def main():
     username=os.getenv("LAVA_USERNAME", "admin")
-    hostname=os.getenv("LAVA_HOSTNAME", "10.0.3.133")
+    hostname=os.getenv("LAVA_HOSTNAME", "validation.deepin.io")
     token=os.getenv("LAVA_TOKEN")
 
     if token == None or hostname == None or username == None:
@@ -99,8 +99,6 @@ def main():
         print "Submit job %d from %d" % (nid, id)
         print "See also http://%s/scheduler/job/%d" % (hostname, id)
         id=nid
-
-
 
     show_output_log(server, id)
 
