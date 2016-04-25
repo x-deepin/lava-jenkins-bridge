@@ -46,7 +46,7 @@ def show_output_log(server, id):
 def parse_flags():
     id=int(os.getenv("JOB_ID", 0))
     if id != 0:
-        return id, True
+        return id, str(os.getenv("SUBMIT", "true")) == 'true'
 
     if len(sys.argv) < 2:
         return 0, False
@@ -56,10 +56,6 @@ def parse_flags():
         return int(sys.argv[2]), submit
     else:
         return int(sys.argv[1]), submit
-
-
-def status_is_complete(server, id):
-    return server.job_details(id)["status"]=="Complete"
 
 def show_bundle(server, id):
     result=False
