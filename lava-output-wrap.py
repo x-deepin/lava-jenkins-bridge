@@ -83,7 +83,7 @@ def main():
         print "Please setup LAVA_USRNAME, LAVA_HOSTNAME, LAVA_TOKEN environment"
         exit(-1)
 
-    server = xmlrpclib.ServerProxy("http://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
+    server = xmlrpclib.ServerProxy("https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
     id, submit = parse_flags()
     if id == 0:
@@ -93,16 +93,13 @@ def main():
     if submit:
         nid=server.resubmit_job(id)
         print "Submit job %d from %d" % (nid, id)
-        print "See also http://%s/scheduler/job/%d" % (hostname, id)
+        print "See also https://%s/scheduler/job/%d" % (hostname, id)
         id=nid
 
     show_output_log(server, id)
 
     if not show_bundle(server, id):
         exit(-1)
-    print "See also http://%s/scheduler/job/%d" % (hostname, id)
+    print "See also https://%s/scheduler/job/%d" % (hostname, id)
 
-
-open("running", 'a').close()
 main()
-os.remove("running")
