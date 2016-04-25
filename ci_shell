@@ -1,0 +1,28 @@
+#!/bin/bash -ex
+
+# NOTE: this script is only served https://ci.deepin.io/job/rr-checker-lava-bridge.
+# Don't use it directly.
+wget https://raw.githubusercontent.com/x-deepin/lava-jenkins-bridge/master/lava-output-wrap.py -O lava-output-wrap.py
+
+if [[ $JOB_SUBMIT == 'true' ]]; then
+    python -u lava-output-wrap.py -s $JOB_ID
+else
+    python -u lava-output-wrap.py $JOB_ID
+fi
+
+last_result=$?
+
+if [[ $last_result == 0 ]]; then
+    result="true"
+else
+    result="false"
+fi
+
+source params.env
+
+set +x  # Must use this to hide the $RR_CHECKER_TOKEN value
+curl -X POST ${HOST_API}/test_result/${REVIEW_ID} -H "Access-Token: $RR_CHECKER_TOKEN" -d "comment=lava bridge. see details in ${BUILD_URL}/console&passed=$result"
+
+if [[ $result != "true" ]]; then
+    exit 1
+fi

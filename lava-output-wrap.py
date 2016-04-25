@@ -83,6 +83,7 @@ def main():
     server = xmlrpclib.ServerProxy("https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
     id, submit = parse_flags()
+    print "Debug: Run with arguments id:{} submit:{}".format(id, submit)
     if id == 0:
         print "Usage: %s [-s] job_id" % sys.argv[0]
         exit(-1)
@@ -90,8 +91,9 @@ def main():
     if submit:
         nid=server.resubmit_job(id)
         print "Submit job %d from %d" % (nid, id)
-        print "See also https://%s/scheduler/job/%d" % (hostname, id)
         id=nid
+
+        print "See also https://%s/scheduler/job/%d" % (hostname, id)
 
     show_output_log(server, id)
 
