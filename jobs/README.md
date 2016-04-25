@@ -24,6 +24,8 @@ auto文件为一个有效的shell文件. 通过以下形式调用
 echo $* | grep -e network -e wifi -e iw
 ```
 
+具体实现参考ci_shell中的[find_job_name](https://github.com/x-deepin/lava-jenkins-bridge/blob/master/ci_shell#L6)定义
+
 # TODO
 重构JOB_NAME.json文件. 抽取公共部分. 简化编写JOB的同时支持多个JOB同时被选择.
 

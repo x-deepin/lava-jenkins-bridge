@@ -2,6 +2,33 @@
 
 # NOTE: this script is only served https://ci.deepin.io/job/rr-checker-lava-bridge.
 # Don't use it directly.
+
+# the caller need pass $CHANGE_LIST in
+
+function find_job_name()
+{
+    if [[ $JOB_NAME != "auto" ]]; then
+	echo $JOB_NAME
+	return
+    else
+	set +e
+	for checker in $(ls ./jobs/*.auto); do
+	    if [[ $(bash $checker $CHANGE_LIST) ]]; then
+		bname=$(basename $checker)
+		echo "${bname/.auto/}"
+		return
+	    fi
+	done
+	set -e
+    fi
+}
+
+JOB_NAME="$(find_job_name)"
+if [[ $JOB_NAME == "" ]]; then
+    echo "Can't find valid JOB_NAME"
+    exit -1
+fi
+
 python -u ./lava-output-wrap.py $JOB_NAME
 
 last_result=$?

@@ -29,5 +29,5 @@ CI作为rr.deepin.io以及validation.deepin.io的桥梁进行
 # TODO
 
 1. (DONE) 根据之后的lava job,tests仓库直接抓取job定义并执行.
-2. 根据rr之后提供的changelist进行分析是否执行job以及执行哪些job
+2. (DONE) 根据rr之后提供的changelist进行分析是否执行job以及执行哪些job
 3. (DONE) 根据实际执行结果判断是否Job是成功．替换之前的job\_details["status"] == "Complte"的判断方式．
