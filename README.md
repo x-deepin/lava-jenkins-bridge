@@ -2,10 +2,9 @@
 
 客户端通过xmlrpc接口实时显示Job的Output从而让jenkins可以和lava任务串联起来
 
-1. 根据job\_details["status"] == "Complete" 判断是否成功
+1. 根据job\_details["_results_link"]中的bundle信息 判断是否成功
 2. 通过job\_output(id, offset)以及job_details["end\_time"] + sleep 去poll
    Job的output并输出到stdout
-
 
 CI上目前是放在 https://ci.deepin.io/job/rr-checker-lava-bridge/ 上
 
@@ -22,7 +21,6 @@ rr-checker-lava-bridge 参考 https://github.com/linuxdeepin/developer-center/wi
 
 
 CI作为rr.deepin.io以及validation.deepin.io的桥梁进行
-
 1. Job submit when repository try changing.
 2. report lava job result to rr.deepin.io review page
 
@@ -31,4 +29,4 @@ CI作为rr.deepin.io以及validation.deepin.io的桥梁进行
 
 1. 根据之后的lava job,tests仓库直接抓取job定义并执行.
 2. 根据rr之后提供的changelist进行分析是否执行job以及执行哪些job
-3. 根据实际执行结果判断是否Job是成功．替换之前的job\_details["status"] == "Complte"的判断方式．
+3. (DONE) 根据实际执行结果判断是否Job是成功．替换之前的job\_details["status"] == "Complte"的判断方式．
