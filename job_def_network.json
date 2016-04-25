@@ -1,0 +1,44 @@
+{
+    "actions": [
+        {
+            "command": "deploy_linaro_kernel",
+            "parameters": {
+                "bootloadertype": "ipxe",
+                "kernel": "http://10.0.3.133/tftpboot/vmlinuz",
+                "nfsrootfs": "http://10.0.3.133/tftpboot/deepin.tar.gz",
+                "ramdisk": "http://10.0.3.133/tftpboot/initrd.img",
+                "target_type": "deepin"
+            }
+        },
+        {
+            "command": "boot_linaro_image"
+        },
+        {
+            "command": "lava_test_shell",
+            "parameters": {
+                "testdef_repos": [
+                    {
+                        "git-repo": "https://github.com/x-deepin/network-testing-experiments.git",
+                        "parameters": {
+                            "ADAPTER_TYPE": "wired",
+                            "IPERF3_SERVER": "10.0.3.133",
+                            "TIME": 30
+                        },
+                        "testdef": "network-testing.yaml"
+                    }
+                ],
+                "timeout": 900
+            }
+        },
+        {
+            "command": "submit_results",
+            "parameters": {
+                "server": "https://validation.deepin.io/RPC2/",
+                "stream": "/anonymous/network/"
+            }
+        }
+    ],
+    "device_type": "x86_skip_ipxe",
+    "job_name": "network-testing",
+    "timeout": 18000
+}
