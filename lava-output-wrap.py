@@ -22,6 +22,7 @@ def wait_output(server, id, max_tries, retries=-1):
         print "Waiting job %d to run %ds/%ds (E: %s)" % (id, retries, max_tries, e)
         return wait_output(server, id, max_tries, retries-1)
 
+
 def show_output_log(server, id):
     out = wait_output(server, id, 100)
     if out == None:
@@ -42,12 +43,7 @@ def show_output_log(server, id):
             time.sleep(0.5)
 
 
-
 def parse_flags():
-    id=int(os.getenv("JOB_ID", 0))
-    if id != 0:
-        return id, str(os.getenv("SUBMIT", "true")) == 'true'
-
     if len(sys.argv) < 2:
         return 0, False
 
@@ -56,6 +52,7 @@ def parse_flags():
         return int(sys.argv[2]), submit
     else:
         return int(sys.argv[1]), submit
+
 
 def show_bundle(server, id):
     result=False
