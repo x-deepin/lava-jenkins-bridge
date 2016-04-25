@@ -1,0 +1,49 @@
+{
+  "actions": [
+    {
+      "parameters": {
+        "target_type": "ubuntu",
+        "ramdisk": "http://10.0.3.133/initrd",
+        "kernel": "http://10.0.3.133/vmlinuz",
+        "bootloadertype": "ipxe"
+      },
+      "command": "deploy_linaro_kernel"
+    },
+    {
+      "parameters": {
+        "boot_cmds": [
+          "dhcp net0",
+          "kernel http:\/\/{SERVER_IP}\/tmp\/{KERNEL} root=\/dev\/nfs rw nfsroot=10.3.2.1:\/srv\/nfs\/deepin-15-20160604,tcp,hard,intr ip=dhcp console=ttyS1",
+          "initrd http:\/\/{SERVER_IP}\/tmp\/{RAMDISK}",
+          "boot"
+        ]
+      },
+      "command": "boot_linaro_image"
+    },
+    {
+      "parameters": {
+        "timeout": 900,
+        "testdef_repos": [
+          {
+            "parameters": {
+              "DESKTOP_OWNER": "slave"
+            },
+            "testdef": "video-testing.yaml",
+            "git-repo": "git@172.16.166.138:\/var\/spool\/git\/video-testing-experiments.git"
+          }
+        ]
+      },
+      "command": "lava_test_shell"
+    },
+    {
+      "parameters": {
+        "stream": "\/anonymous\/video\/",
+        "server": "http:\/\/172.16.166.138\/RPC2\/"
+      },
+      "command": "submit_results"
+    }
+  ],
+  "job_name": "video-test",
+  "target": "vm1",
+  "timeout": 18000
+}

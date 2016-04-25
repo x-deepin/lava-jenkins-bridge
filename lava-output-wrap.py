@@ -71,7 +71,18 @@ def show_bundle(server, id):
         return result
 
 
+
+def submit_job(server, name):
+    with file("jobs/{}.json".format(name)) as f:
+        return server.submit_job(f.read())
+    return 0
+
+
 def main():
+    if len(sys.argv) != 2:
+        print "Usage: {} job_name".format(sys.argv[0])
+        exit(-1)
+
     username=os.getenv("LAVA_USERNAME", "admin")
     hostname=os.getenv("LAVA_HOSTNAME", "validation.deepin.io")
     token=os.getenv("LAVA_TOKEN")
@@ -82,18 +93,13 @@ def main():
 
     server = xmlrpclib.ServerProxy("https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
-    id, submit = parse_flags()
-    print "Debug: Run with arguments id:{} submit:{}".format(id, submit)
+    job_name=sys.argv[1]
+    id = submit_job(server, job_name)
     if id == 0:
-        print "Usage: %s [-s] job_id" % sys.argv[0]
+        print "Failed submit job {}".format(job_name)
         exit(-1)
 
-    if submit:
-        nid=server.resubmit_job(id)
-        print "Submit job %d from %d" % (nid, id)
-        id=nid
-
-        print "See also https://%s/scheduler/job/%d" % (hostname, id)
+    print "Submit {} to https://{}/scheduler/job/{}".format(job_name, hostname, id)
 
     show_output_log(server, id)
 

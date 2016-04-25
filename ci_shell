@@ -2,13 +2,7 @@
 
 # NOTE: this script is only served https://ci.deepin.io/job/rr-checker-lava-bridge.
 # Don't use it directly.
-wget https://raw.githubusercontent.com/x-deepin/lava-jenkins-bridge/master/lava-output-wrap.py -O lava-output-wrap.py
-
-if [[ $JOB_SUBMIT == 'true' ]]; then
-    python -u lava-output-wrap.py -s $JOB_ID
-else
-    python -u lava-output-wrap.py $JOB_ID
-fi
+python -u ./lava-output-wrap.py $JOB_NAME
 
 last_result=$?
 
