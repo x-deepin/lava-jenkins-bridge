@@ -5,45 +5,74 @@
 
 # the caller need pass $CHANGE_LIST in
 
+function get_changelist()
+{
+    wget $1/checkupdate/data.json -q -O - |
+	python3 -c 'import json,sys; print(*map(lambda i : i["name"], json.loads(sys.stdin.read())), sep="\n")'
+}
+
 function find_job_name()
 {
-    if [[ $JOB_NAME != "auto" ]]; then
-	echo $JOB_NAME
-	return
-    else
+    local job_name=$1
+    local rpa=$2
+    if [[ $job_name == "auto" || $job_name == "" ]]; then
 	set +e
+	debs=$(get_changelist $rpa)
 	for checker in $(ls ./jobs/*.auto); do
-	    if [[ $(bash $checker $CHANGE_LIST) ]]; then
+	    if [[ $(bash $checker $debs) ]]; then
 		bname=$(basename $checker)
 		echo "${bname/.auto/}"
 		return
 	    fi
 	done
 	set -e
+    else
+	echo $job_name
+	return
     fi
 }
 
-JOB_NAME="$(find_job_name)"
-if [[ $JOB_NAME == "" ]]; then
-    echo "Can't find valid JOB_NAME"
-    exit -1
-fi
+## import RPA, RR_CHECKER_TOKEN,HOST_API,JOB_NAME,REVIEW_ID,BUILD_URL
+function setup()
+{
+    # $JOB_NAME is optional.
+    source params.env
+    if [[ $RPA == "" || $RR_CHECKER_TOKEN == "" || $HOST_API == "" || $REVIEW_ID == "" || $BUILD_URL == "" ]];then
+	exit -1
+    fi
+}
 
-python -u ./lava-output-wrap.py $JOB_NAME
+function submit_lava_job()
+{
+    JOB_NAME="$(find_job_name "$JOB_NAME" "$RPA")"
 
-last_result=$?
+    if [[ $JOB_NAME == "" ]]; then
+	echo "Can't find valid JOB_NAME"
+	exit -1
+    fi
 
-if [[ $last_result == 0 ]]; then
-    result="true"
-else
-    result="false"
-fi
+    python3 -u ./lava-jenkins-bridge.py $JOB_NAME
+    return $?
+}
 
-source params.env
+function report_to_rr_deepin_io()
+{
+    if [[ $1 == 0 ]]; then
+	result="true"
+    else
+	result="false"
+    fi
+    set +x  # Must use this to hide the $RR_CHECKER_TOKEN value
+    curl -X POST ${HOST_API}/test_result/${REVIEW_ID} -H "Access-Token: $RR_CHECKER_TOKEN" -d "comment=lava bridge. see details in ${BUILD_URL}/console&passed=$result"
 
-set +x  # Must use this to hide the $RR_CHECKER_TOKEN value
-curl -X POST ${HOST_API}/test_result/${REVIEW_ID} -H "Access-Token: $RR_CHECKER_TOKEN" -d "comment=lava bridge. see details in ${BUILD_URL}/console&passed=$result"
+    if [[ $result != "true" ]]; then
+	exit 1
+    fi
+}
 
-if [[ $result != "true" ]]; then
-    exit 1
-fi
+
+setup
+
+submit_lava_job "$JOB_NAME" "$RPA"
+
+report_to_rr_deepin_io $?

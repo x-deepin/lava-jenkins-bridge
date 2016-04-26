@@ -14,7 +14,7 @@ JOB_NAME
 # auto 格式
 auto文件为一个有效的shell文件. 通过以下形式调用
 ```
-./JOB_NAME.auto $(changelist)
+./JOB_NAME.auto pkg1 pkg2 pkg3 ....
 ```
 并判断$?为0来决定使用对应的JOB_NAME.json.
 
