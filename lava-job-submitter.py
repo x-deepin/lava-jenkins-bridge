@@ -86,9 +86,11 @@ def build_server(args):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Submit lava job and output the result"
+    )
     parser.add_argument(
-        "job_file", nargs="?", default=sys.stdin, type=argparse.FileType("rt"))
+        "job_file", nargs="?", default=sys.stdin, help="read job content from stdin default", type=argparse.FileType("rt"))
     parser.add_argument("--token", help="the lava authentication token")
     parser.add_argument(
         "--host", help="the lava api server", default="validation.deepin.io")

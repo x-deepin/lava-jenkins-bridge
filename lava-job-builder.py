@@ -6,7 +6,9 @@ import json
 import sys
 import argparse
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+    description="Load lava job definition from stdin and overwrite values accord the arguments")
+
 
 parser.add_argument(
     "--nfsrootfs", help="overwrite the actions.deploy_linaro_kernel.parameters.nfsrootfs",
@@ -21,6 +23,7 @@ parser.add_argument(
     default="https://validation.deepin.io/tftpboot/initrd.img")
 
 args = parser.parse_args()
+
 
 job = json.loads(sys.stdin.read())
 for idx, action in enumerate(job["actions"]):
