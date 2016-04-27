@@ -9,108 +9,110 @@ from xmlrpc import client
 import time
 import hashlib
 import codecs
+import argparse
+
 
 def wait_output(server, id, max_tries, retries=-1):
     if retries == -1:
         retries = max_tries
-    if retries == 0 :
+        sys.argv
+
+    if retries == 0:
         return None
     try:
         d = server.job_output(id).data.decode()
         return d
     except Exception as e:
         time.sleep(1)
-        print("Waiting job %d to run {}s/{}s (E: {})".format(id, retries, max_tries, e))
-        return wait_output(server, id, max_tries, retries-1)
+        print("Waiting job {} to run {}s/{}s (E: {})".format(
+            id, retries, max_tries, e))
+        return wait_output(server, id, max_tries, retries - 1)
 
 
 def show_output_log(server, id):
     out = wait_output(server, id, 100)
     if out == None:
         raise RuntimeError("Failed wait job %d.." % id)
-    olen=0
-    end=None
-    out=""
+    olen = 0
+    end = None
+    out = ""
+
     def md5(s):
-        m=hashlib.md5()
+        m = hashlib.md5()
         m.update(s.encode())
         return m.hexdigest()
     while end is None:
-        nout=server.job_output(id,olen).data.decode()
-        end=server.job_details(id)["end_time"]
+        nout = server.job_output(id, olen).data.decode()
+        end = server.job_details(id)["end_time"]
         if md5(nout) != md5(out):
             out = nout
-            olen=olen+len(out)
-            #print("-----------------", olen, md5(out))
+            olen = olen + len(out)
+            # print("-----------------", olen, md5(out))
             print(out)
-
         if end is None:
             time.sleep(0.5)
 
 
-def parse_flags():
-    if len(sys.argv) < 2:
-        return 0, False
-
-    submit= sys.argv[1] == "-s"
-    if submit:
-        return int(sys.argv[2]), submit
-    else:
-        return int(sys.argv[1]), submit
-
-
 def show_bundle(server, id):
-    result=False
+    result = False
     try:
-        response= urllib.request.urlopen("%s/export" % (server.job_details(id)["_results_link"]))
+        response = urllib.request.urlopen(
+            "%s/export" % (server.job_details(id)["_results_link"]))
 
         row_format = "{:>15}" * 3
         print(row_format.format("test_name", "count_pass", "count_fail"))
-        result=True
+        result = True
         for row in csv.DictReader(codecs.iterdecode(response, 'utf-8')):
             if int(row["count_fail"]) > 0:
                 result = False
-            print(row_format.format(row["test"], row["count_pass"], row["count_fail"]))
+            print(
+                row_format.format(row["test"], row["count_pass"], row["count_fail"]))
         return result
     except Exception as e:
         print(e)
         return result
 
 
+def build_server(args):
+    username = args.user
+    hostname = args.host
+    token = args.token
+    if token == None or hostname == None or username == None:
+        print("Please setup user, server and token arguments")
+        exit(-1)
 
-def submit_job(server, name):
-    with open("jobs/{}.json".format(name), "rt") as f:
-        return server.submit_job(f.read())
-    return 0
+    return client.ServerProxy(
+        "https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: {} job_name".format(sys.argv[0]))
-        exit(-1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "job_file", nargs="?", default=sys.stdin, type=argparse.FileType("rt"))
+    parser.add_argument("--token", help="the lava authentication token")
+    parser.add_argument(
+        "--host", help="the lava api server", default="validation.deepin.io")
+    parser.add_argument(
+        "--user", help="the user to operation with lava api", default="admin")
 
-    username=os.getenv("LAVA_USERNAME", "admin")
-    hostname=os.getenv("LAVA_HOSTNAME", "validation.deepin.io")
-    token=os.getenv("LAVA_TOKEN")
+    args = parser.parse_args()
 
-    if token == None or hostname == None or username == None:
-        print("Please setup LAVA_USRNAME, LAVA_HOSTNAME, LAVA_TOKEN environment")
-        exit(-1)
+    server = build_server(args)
 
-    server = client.ServerProxy("https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
+    job_content = args.job_file.read()
+    print (args, job_content)
+    id = server.submit_job(job_content)
 
-    job_name=sys.argv[1]
-    id = submit_job(server, job_name)
     if id == 0:
-        print("Failed submit job {}".format(job_name))
+        print("Failed submit job {}".format(job_content))
         exit(-1)
 
-    print("Submit job '{}' to https://{}/scheduler/job/{}".format(job_name, hostname, id))
+    print("Submit job to https://{}/scheduler/job/{}".format(args.host, id))
 
     show_output_log(server, id)
 
     if not show_bundle(server, id):
         exit(-1)
-    print("See also https://{}/scheduler/job/{}".format(hostname, id))
+    print("See also https://{}/scheduler/job/{}".format(args.host, id))
 
 main()

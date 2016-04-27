@@ -35,7 +35,7 @@ function find_job_name()
 ## import RPA, RR_CHECKER_TOKEN,HOST_API,JOB_NAME,REVIEW_ID,BUILD_URL
 function setup()
 {
-    # $JOB_NAME is optional.
+    # $JOB_NAME and $ROOTFS are optional.
     source params.env
     if [[ $RPA == "" || $RR_CHECKER_TOKEN == "" || $HOST_API == "" || $REVIEW_ID == "" || $BUILD_URL == "" ]];then
 	exit -1
@@ -51,7 +51,10 @@ function submit_lava_job()
 	exit -1
     fi
 
-    python3 -u ./lava-jenkins-bridge.py $JOB_NAME
+    job=$(cat "jobs/${JOB_NAME}.json" | python3 ./lava-job-builder.py --nfsrootfs="$ROOTFS")
+    set +e
+    echo "$job" | python3 -u ./lava-jenkins-bridge.py --token="$LAVA_TOKEN" --user="admin" --host="validation.deepin.io"
+    set -e
     return $?
 }
 
