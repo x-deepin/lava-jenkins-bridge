@@ -20,11 +20,13 @@
                     {
                         "git-repo": "https://github.com/x-deepin/network-testing-experiments.git",
                         "parameters": {
-                            "ADAPTER_TYPE": "wired",
+                            "ADAPTER_TYPE": "wireless",
                             "IPERF3_SERVER": "10.0.3.133",
+                            "SSID": "lava-test",
+                            "PASSWORD": "lava-test",
                             "TIME": 30
                         },
-                        "testdef": "network-testing.yaml"
+                        "testdef": "network-testing-wireless.yaml"
                     }
                 ],
                 "timeout": 900
@@ -39,6 +41,6 @@
         }
     ],
     "device_type": "x86_skip_ipxe",
-    "job_name": "network-testing",
+    "job_name": "network-testing-wireless",
     "timeout": 18000
 }
