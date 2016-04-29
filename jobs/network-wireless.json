@@ -23,7 +23,7 @@
                             "ADAPTER_TYPE": "wireless",
                             "IPERF3_SERVER": "10.0.3.133",
                             "SSID": "lava-test",
-                            "PASSWORD": "lava-test",
+                            "PASSWORD": "lava-test-with-hard-password",
                             "TIME": 30
                         },
                         "testdef": "network-testing-wireless.yaml"
