@@ -27,6 +27,11 @@ CI作为rr.deepin.io以及validation.deepin.io的桥梁进行
 1. Job submit when repository try changing.
 2. report lava job result to rr.deepin.io review page
 
+## 配置方式
+
+1. 直接在jenkins中运行本脚本
+2. 设置合适的JOB_NAME. 目前是通过传递CI参数进行
+3. 设置合适的$ROOTFS环境变量. 目前通过copy上游项目的parms.env并在其中进行设置.
 
 # lava-job-submitter
 
