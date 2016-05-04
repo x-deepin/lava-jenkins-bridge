@@ -53,7 +53,7 @@ function submit_lava_job()
 
     job=$(cat "jobs/${JOB_NAME}.json" | python3 ./lava-job-builder.py --nfsrootfs="$ROOTFS")
     set +x
-    echo "$job" | python3 -u ./lava-job-submitter.py --token="$LAVA_TOKEN" --user="admin" --host="validation.deepin.io"
+    echo "$job" | python3 -u ./lava-job-submitter.py --token="$LAVA_TOKEN" --user="jenkins" --host="validation.deepin.io"
     set -x
     return $?
 }
