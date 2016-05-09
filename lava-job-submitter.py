@@ -55,6 +55,7 @@ def show_output_log(server, id):
 
 def show_bundle(server, id):
     result = False
+    found_custom_test = False
     try:
         response = urllib.request.urlopen(
             "%s/export" % (server.job_details(id)["_results_link"]))
@@ -63,14 +64,16 @@ def show_bundle(server, id):
         print(row_format.format("test_name", "count_pass", "count_fail"))
         result = True
         for row in csv.DictReader(codecs.iterdecode(response, 'utf-8')):
+            if row["test"] != "lava" and row["test"] != None:
+                found_custom_test = True
             if int(row["count_fail"]) > 0:
                 result = False
             print(
                 row_format.format(row["test"], row["count_pass"], row["count_fail"]))
-        return result
+        return result and found_custom_test
     except Exception as e:
         print(e)
-        return result
+        return result and found_custom_test
 
 
 def build_server(args):
