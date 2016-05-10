@@ -24,13 +24,13 @@ def wait_output(server, id, max_tries, retries=-1):
         return d
     except Exception as e:
         time.sleep(1)
-        print("Waiting job {} to run {}s/{}s (E: {})".format(
-            id, retries, max_tries, e))
+        # print("Waiting job {} to run {}s/{}s (E: {})".format(
+        #            id, retries, max_tries, e))
         return wait_output(server, id, max_tries, retries - 1)
 
 
 def show_output_log(server, id):
-    out = wait_output(server, id, 100)
+    out = wait_output(server, id, 18000)
     if out == None:
         raise RuntimeError("Failed wait job %d.." % id)
     olen = 0
@@ -48,7 +48,7 @@ def show_output_log(server, id):
             out = nout
             olen = olen + len(out)
             # print("-----------------", olen, md5(out))
-            print(out)
+            # print(out)
         if end is None:
             time.sleep(0.5)
 
@@ -105,7 +105,6 @@ def main():
     server = build_server(args)
 
     job_content = args.job_file.read()
-    print (args, job_content)
     id = server.submit_job(job_content)
 
     if id == 0:
@@ -117,7 +116,8 @@ def main():
     show_output_log(server, id)
 
     if not show_bundle(server, id):
+        print(
+            "Running failed, see https://{}/scheduler/job/{}".format(args.host, id))
         exit(-1)
-    print("See also https://{}/scheduler/job/{}".format(args.host, id))
 
 main()

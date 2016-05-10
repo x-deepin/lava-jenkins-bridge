@@ -1,39 +1,12 @@
 {
-    "actions": [
+    "testdef_repos": [
 	{
-	    "command": "deploy_linaro_kernel",
-	    "parameters": {
-		"bootloadertype": "ipxe",
-		"kernel": "http://10.0.3.133/tftpboot/vmlinuz",
-		"nfsrootfs": "http://10.0.3.133/tftpboot/deepin.tar.gz",
-		"ramdisk": "http://10.0.3.133/tftpboot/initrd.img",
-		"target_type": "deepin"
-	    }
-	},
-	{
-	    "command": "boot_linaro_image"
-	},
-	{
-	    "command": "lava_test_shell",
-	    "parameters": {
-		"testdef_repos": [
-		    {
-			"git-repo": "http://github.com/x-deepin/video-testing-experiments.git",
-			"testdef": "video-testing.yaml"
-		    }
-		],
-		"timeout": 900
-	    }
-	},
-	{
-	    "command": "submit_results",
-	    "parameters": {
-		"server": "https://validation.deepin.io/RPC2/",
-		"stream": "/anonymous/network/"
-	    }
+	    "git-repo": "http://github.com/x-deepin/video-testing-experiments.git",
+	    "testdef": "video-testing.yaml",
+	    "minimal_tags": ["video"]
 	}
     ],
-    "device_type": "x86_skip_ipxe",
-    "job_name": "video-testing",
-    "timeout": 18000
+    "stream": "/anonymous/video/",
+    "timeout": 18000,
+    "name": "video-test"
 }

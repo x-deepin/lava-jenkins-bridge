@@ -11,7 +11,7 @@ function get_changelist()
 	python3 -c 'import json,sys; print(*map(lambda i : i["name"], json.loads(sys.stdin.read())), sep="\n")'
 }
 
-function find_job_name()
+function find_job_files()
 {
     local job_name=$1
     local rpa=$2
@@ -19,15 +19,14 @@ function find_job_name()
 	set +e
 	debs=$(get_changelist $rpa)
 	for checker in $(ls ./jobs/*.auto); do
-	    if [[ $(bash $checker $debs) ]]; then
+	    if $(bash $checker $debs) ; then
 		bname=$(basename $checker)
-		echo "${bname/.auto/}"
-		return
+		echo "./jobs/${bname/.auto/}.json"
 	    fi
 	done
 	set -e
     else
-	echo $job_name
+	echo "./jobs/${job_name}.json"
 	return
     fi
 }
@@ -44,16 +43,20 @@ function setup()
 
 function submit_lava_job()
 {
-    JOB_NAME="$(find_job_name "$JOB_NAME" "$RPA")"
+    local job_tpls
+    job_tpls="$(find_job_files "$JOB_NAME" "$RPA")"
 
-    if [[ $JOB_NAME == "" ]]; then
-	echo "Can't find valid JOB_NAME"
+    if [[ $job_tpls == "" ]]; then
+	echo "Can't find valid JOB"
 	exit -1
     fi
 
-    job=$(cat "jobs/${JOB_NAME}.json" | python3 ./lava-job-builder.py --nfsrootfs="$ROOTFS")
+    
     set +x
-    echo "$job" | python3 -u ./lava-job-submitter.py --token="$LAVA_TOKEN" --user="jenkins" --host="validation.deepin.io"
+    rm -rf $WORKSPACE/output/*.json
+    ./lava-job-builder.py --submitter="$BUILD_URL" --user="jenkins" --token="$LAVA_TOKEN" --nfsrootfs="$ROOTFS" --output="$WORKSPACE/output" $(echo $job_tpls)
+
+    ls $WORKSPACE/output/*.json | xargs -n1 -P100 python3 -u ./lava-job-submitter.py --token="$LAVA_TOKEN" --user="jenkins" --host="validation.deepin.io" 
     set -x
     return $?
 }

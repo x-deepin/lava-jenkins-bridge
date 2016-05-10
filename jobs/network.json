@@ -1,0 +1,29 @@
+{
+    "testdef_repos": [
+        {
+            "git-repo": "https://github.com/x-deepin/network-testing-experiments.git",
+            "parameters": {
+                "ADAPTER_TYPE": "wired",
+                "IPERF3_SERVER": "10.0.3.133",
+                "TIME": 30
+            },
+            "testdef": "network-testing-wired.yaml",
+	    "minimal_tags":["ethernet"]
+        },
+        {
+            "git-repo": "https://github.com/x-deepin/network-testing-experiments.git",
+            "parameters": {
+                "ADAPTER_TYPE": "wireless",
+                "IPERF3_SERVER": "10.0.3.133",
+                "SSID": "lava-test",
+                "PASSWORD": "lava-test-with-hard-password",
+                "TIME": 30
+            },
+            "testdef": "network-testing-wireless.yaml",
+	    "minimal_tags":["ethernet"]
+        }
+    ],
+    "stream": "/anonymous/network/",
+    "timeout": 18000,
+    "name": "network-test"
+}
