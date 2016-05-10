@@ -56,7 +56,7 @@ function submit_lava_job()
     rm -rf $WORKSPACE/output/*.json
     ./lava-job-builder.py --submitter="$BUILD_URL" --user="jenkins" --token="$LAVA_TOKEN" --nfsrootfs="$ROOTFS" --output="$WORKSPACE/output" $(echo $job_tpls)
 
-    ls $WORKSPACE/output/*.json | xargs -n1 -P100 python3 -u ./lava-job-submitter.py --token="$LAVA_TOKEN" --user="jenkins" --host="validation.deepin.io" 
+    ls $WORKSPACE/output/*.json | xargs -n1 -P1 python3 -u ./lava-job-submitter.py --token="$LAVA_TOKEN" --user="jenkins" --host="validation.deepin.io" 
     set -x
     return $?
 }

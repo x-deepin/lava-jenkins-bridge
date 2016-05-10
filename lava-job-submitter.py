@@ -12,21 +12,14 @@ import codecs
 import argparse
 
 
-def wait_output(server, id, max_tries, retries=-1):
-    if retries == -1:
-        retries = max_tries
-        sys.argv
-
-    if retries == 0:
-        return None
-    try:
-        d = server.job_output(id).data.decode()
-        return d
-    except Exception as e:
-        time.sleep(1)
-        # print("Waiting job {} to run {}s/{}s (E: {})".format(
-        #            id, retries, max_tries, e))
-        return wait_output(server, id, max_tries, retries - 1)
+def wait_output(server, id, max_tries):
+    for i in range(max_tries):
+        try:
+            return server.job_output(id).data.decode()
+        except Exception as e:
+            time.sleep(1)
+            # print("Waiting job {} to run {}s/{}s (E: {})".format(
+            #            id, i, max_tries, e))
 
 
 def show_output_log(server, id):
