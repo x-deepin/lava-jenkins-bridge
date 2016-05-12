@@ -157,6 +157,9 @@ parser = argparse.ArgumentParser(
 
 
 parser.add_argument(
+    "--list-devices", help="Dump the lava devices information and exit.", default=False, type=bool)
+
+parser.add_argument(
     "--nfsrootfs", help="overwrite the actions.deploy_linaro_kernel.parameters.nfsrootfs",
     default="https://validation.deepin.io/tftpboot/deepin.tar.gz")
 
@@ -185,11 +188,16 @@ parser.add_argument(
     "--submitter", help="indicator who created this job?", default=None)
 
 parser.add_argument(
-    "job_file", nargs="+", default=sys.stdin, help="read job content from stdin default", type=argparse.FileType("rt"))
+    "job_file", nargs="*", default=sys.stdin, help="read job content from stdin default", type=argparse.FileType("rt"))
 
 args = parser.parse_args()
 
 dinfos = cache_device_info(args.username, args.hostname, args.token)
+
+if args.list_devices:
+    print(json.dumps(dinfos))
+    print("\n")
+    sys.exit(0)
 
 jt = JobTemplate(dinfos, args.kernel,
                  args.ramdisk, args.nfsrootfs, args.submitter)
