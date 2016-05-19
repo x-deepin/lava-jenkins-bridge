@@ -9,7 +9,7 @@
             "minimal_tags": ["perf-dde-launch-time"]
         }
     ],
-    "stream": "/anonymous/perf-launch-time",
+    "stream": "/anonymous/dde-launch-time/",
     "timeout": 18000,
     "name": "measure-dde-launch-time"
 }
