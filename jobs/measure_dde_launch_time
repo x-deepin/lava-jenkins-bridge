@@ -1,0 +1,15 @@
+{
+    "testdef_repos": [
+        {
+            "git-repo": "https://github.com/x-deepin/dde-launch-time.git",
+            "parameters": {
+                "AUTO_LOGIN_USER": "deepin"
+            },
+            "testdef": "lava/dde-launch-time.yaml",
+            "minimal_tags": ["perf-dde-launch-time"]
+        }
+    ],
+    "stream": "/anonymous/perf-launch-time",
+    "timeout": 18000,
+    "name": "measure-dde-launch-time"
+}
