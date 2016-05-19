@@ -95,9 +95,11 @@ class JobTemplate:
             for k, group in itertools.groupby(jobs, lambda j: j["stream"]):
                 group = list(group)
                 job = copy.deepcopy(group[0])
+
                 for t in group[1:]:
-                    if t["timeout"] > job["timeout"]:
-                        job["timeout"] = t["timeout"]
+                    if t.get("timeout", 0) > job.get("timeout", 0):
+                        job["timeout"] = t.get("timeout")
+
                     job["testdef_repos"] += t["testdef_repos"]
 
                 self.jobs.append(
@@ -106,13 +108,14 @@ class JobTemplate:
                         job["testdef_repos"],
                         target,
                         job["stream"],
-                        job["timeout"],
+                        job.get("timeout", 0),
                     )
                 )
 
         return self.jobs
 
     def render(self, name, test_defs, target, stream, timeout):
+
         job = {
             "actions": [
                 {
@@ -142,11 +145,13 @@ class JobTemplate:
                     },
                 },
             ],
+            "timeout": 18000,
             "job_name": name,
             "device_type": "x86_skip_ipxe",
             "target": target,
-            "timeout": timeout,
         }
+        if timeout > 0:
+            job["actions"][2]["parameters"]["timeout"] = timeout
         if self.submitter != None:
             job["submitter"] = self.submitter
         return job

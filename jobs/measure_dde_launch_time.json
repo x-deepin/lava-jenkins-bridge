@@ -10,6 +10,6 @@
         }
     ],
     "stream": "/anonymous/dde-launch-time/",
-    "timeout": 18000,
+    "timeout": 900,
     "name": "measure-dde-launch-time"
 }
