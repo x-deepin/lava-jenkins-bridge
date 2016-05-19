@@ -25,19 +25,6 @@
             },
             "testdef": "network-testing-wireless.yaml",
 	        "minimal_tags": ["wifi2"]
-        },
-        {
-            "git-repo": "https://github.com/x-deepin/network-testing-experiments.git",
-            "parameters": {
-                "ADAPTER_TYPE": "wireless",
-                "IPERF3_SERVER": "10.0.3.133",
-                "ADAPTER_NUM": 3,
-                "SSID": "lava-test",
-                "PASSWORD": "lava-test-with-hard-password",
-                "TIME": 30
-            },
-            "testdef": "network-testing-wireless.yaml",
-	        "minimal_tags": ["wifi3"]
         }
     ],
     "stream": "/anonymous/network/",
