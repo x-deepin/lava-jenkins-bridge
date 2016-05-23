@@ -94,7 +94,9 @@ def download_attach(server, id):
         if not len(line.strip()):
             continue
         time_sorted.append(float(line))
-    time_sorted.sort()
+    time_sorted = time_sorted.sort()
+    time_sorted = time_sorted[1:-1]
+    time_sorted[1] = sum(time_sorted) / 3;
     f = open("result.csv", "w")
     f.write("best,avrg,wrst\n")
     f.write("{:.2f},{:.2f},{:.2f}\n".format(*time_sorted))
