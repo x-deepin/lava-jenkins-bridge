@@ -10,6 +10,8 @@ import time
 import hashlib
 import codecs
 import argparse
+import ujson
+import base64
 
 
 def wait_output(server, id, max_tries):
@@ -80,6 +82,22 @@ def build_server(args):
     return client.ServerProxy(
         "https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
+def download_attach():
+    stream = server.dashboard.get(server.scheduler.job_status(job)['bundle_sha1'])
+    for attach in ujson.loads(stream['content'])['test_runs'][0]['attachments']:
+        if 'results' == attach['pathname']:
+            break
+    content = base64.b64decode(attach['content']).decode('utf-8')
+    time_sorted = []
+    for line in content.split('\n'):
+        if not len(line.strip()):
+            continue
+        time_sorted.append(float(line))
+    time_sorted.sort()
+    f = open("result.csv", "w")
+    f.write("best,avrg,wrst\n")
+    f.write("{:.2f},{:.2f},{:.2f}\n".format(*time_sorted))
+    f.close()
 
 def main():
     parser = argparse.ArgumentParser(
@@ -112,5 +130,7 @@ def main():
         print(
             "Running failed, see https://{}/scheduler/job/{}".format(args.host, id))
         exit(-1)
+
+    download_attach(server, id)
 
 main()
