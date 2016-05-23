@@ -83,7 +83,7 @@ def build_server(args):
         "https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
 
 def download_attach(server, id):
-    stream = server.dashboard.get(server.scheduler.job_status(job)['bundle_sha1'])
+    stream = server.dashboard.get(server.scheduler.job_status(id)['bundle_sha1'])
     for attach in json.loads(stream['content'])['test_runs'][0]['attachments']:
         if 'results' == attach['pathname']:
             break
