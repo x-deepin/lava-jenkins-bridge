@@ -10,7 +10,7 @@ import time
 import hashlib
 import codecs
 import argparse
-import ujson
+import json
 import base64
 
 
@@ -84,7 +84,7 @@ def build_server(args):
 
 def download_attach():
     stream = server.dashboard.get(server.scheduler.job_status(job)['bundle_sha1'])
-    for attach in ujson.loads(stream['content'])['test_runs'][0]['attachments']:
+    for attach in json.loads(stream['content'])['test_runs'][0]['attachments']:
         if 'results' == attach['pathname']:
             break
     content = base64.b64decode(attach['content']).decode('utf-8')
