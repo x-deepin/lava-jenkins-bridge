@@ -14,18 +14,18 @@ import json
 import base64
 
 
-def wait_output(server, id, max_tries):
+def wait_output(sched, id, max_tries):
     for i in range(max_tries):
         try:
-            return server.job_output(id).data.decode()
+            return sched.job_output(id).data.decode()
         except Exception as e:
             time.sleep(1)
             # print("Waiting job {} to run {}s/{}s (E: {})".format(
             #            id, i, max_tries, e))
 
 
-def show_output_log(server, id):
-    out = wait_output(server, id, 18000)
+def show_output_log(sched, id):
+    out = wait_output(sched, id, 18000)
     if out == None:
         raise RuntimeError("Failed wait job %d.." % id)
     olen = 0
@@ -37,8 +37,8 @@ def show_output_log(server, id):
         m.update(s.encode())
         return m.hexdigest()
     while end is None:
-        nout = server.job_output(id, olen).data.decode()
-        end = server.job_details(id)["end_time"]
+        nout = sched.job_output(id, olen).data.decode()
+        end = sched.job_details(id)["end_time"]
         if md5(nout) != md5(out):
             out = nout
             olen = olen + len(out)
@@ -48,12 +48,12 @@ def show_output_log(server, id):
             time.sleep(0.5)
 
 
-def show_bundle(server, id):
+def show_bundle(sched, id):
     result = False
     found_custom_test = False
     try:
         response = urllib.request.urlopen(
-            "%s/export" % (server.job_details(id)["_results_link"]))
+            "%s/export" % (sched.job_details(id)["_results_link"]))
 
         row_format = "{:>15}" * 3
         print(row_format.format("test_name", "count_pass", "count_fail"))
@@ -80,10 +80,11 @@ def build_server(args):
         exit(-1)
 
     return client.ServerProxy(
-        "https://%s:%s@%s/RPC2" % (username, token, hostname)).scheduler
+        "https://%s:%s@%s/RPC2" % (username, token, hostname))
 
 def download_attach(server, id):
-    stream = server.dashboard.get(server.scheduler.job_status(id)['bundle_sha1'])
+    job_status = server.scheduler.job_status(id)
+    stream = server.dashboard.get(job_status['bundle_sha1'])
     for attach in json.loads(stream['content'])['test_runs'][0]['attachments']:
         if 'results' == attach['pathname']:
             break
@@ -114,9 +115,10 @@ def main():
     args = parser.parse_args()
 
     server = build_server(args)
+    sched = server.scheduler
 
     job_content = args.job_file.read()
-    id = server.submit_job(job_content)
+    id = sched.submit_job(job_content)
 
     if id == 0:
         print("Failed submit job {}".format(job_content))
@@ -124,9 +126,9 @@ def main():
 
     print("Submit job to https://{}/scheduler/job/{}".format(args.host, id))
 
-    show_output_log(server, id)
+    show_output_log(sched, id)
 
-    if not show_bundle(server, id):
+    if not show_bundle(sched, id):
         print(
             "Running failed, see https://{}/scheduler/job/{}".format(args.host, id))
         exit(-1)
