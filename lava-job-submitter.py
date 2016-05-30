@@ -94,7 +94,7 @@ def download_attach(server, id):
         if not len(line.strip()):
             continue
         time_sorted.append(float(line))
-    time_sorted = time_sorted.sort()
+    time_sorted.sort()
     time_sorted = time_sorted[1:-1]
     time_sorted[1] = sum(time_sorted) / 3;
     f = open("result.csv", "w")
