@@ -54,7 +54,7 @@ function submit_lava_job()
     
     set +x
     rm -rf $WORKSPACE/output/*.json
-    ./lava-job-builder.py --submitter="$BUILD_URL" --user="jenkins" --token="$LAVA_TOKEN" --nfsrootfs="$ROOTFS" --output="$WORKSPACE/output" $(echo $job_tpls)
+    ./lava-job-builder.py --submitter="$BUILD_URL" --user="jenkins" --token="$LAVA_TOKEN" --nfsrootfs="$ROOTFS" --kernel="$KERNEL" --ramdisk="$RAMDISK" --output="$WORKSPACE/output" $(echo $job_tpls)
 
     echo "Prepare running $(ls $WORKSPACE/output/*.json)"
 
