@@ -9,7 +9,7 @@
                 "ADAPTER_NUM": 2,
                 "SSID": "lava-test",
                 "PASSWORD": "lava-test-with-hard-password",
-                "TIME": 30
+                "TIME": 600
             },
             "testdef": "network-testing-wireless.yaml",
 	        "minimal_tags": ["wifi2"]
