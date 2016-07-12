@@ -41,7 +41,7 @@ function setup()
     fi
 }
 
-function curl_start()
+function report_starting_to_rr_deepin_io()
 {
     patch_set=`curl -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/review/${REVIEW_ID}|json_pp|grep latest_patch_set|sed 's/,//'|sed 's/"latest_patch_set" : //g'`
     curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/checker/launch -d "review_id=${REVIEW_ID}&patch_set=${patch_set}&link=${BUILD_URL}"
@@ -69,7 +69,7 @@ function submit_lava_job()
     return $?
 }
 
-function report_to_rr_deepin_io()
+function report_result_to_rr_deepin_io()
 {
     if [[ $1 == 0 ]]; then
 	result="true"
@@ -89,8 +89,8 @@ function report_to_rr_deepin_io()
 
 setup
 
-curl_start
+report_starting_to_rr_deepin_io
 
 submit_lava_job "$JOB_NAME" "$RPA"
 
-report_to_rr_deepin_io $?
+report_result_to_rr_deepin_io $?
