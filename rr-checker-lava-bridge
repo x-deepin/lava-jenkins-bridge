@@ -78,8 +78,8 @@ function report_to_rr_deepin_io()
     fi
     set +x  # Must use this to hide the $RR_CHECKER_TOKEN value
     #curl -X POST ${HOST_API}/test_result/${REVIEW_ID} -H "Access-Token: $RR_CHECKER_TOKEN" -d "comment=lava bridge. see details in ${BUILD_URL}/console&passed=$result"
-    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/test_result/${REVIEW_ID} -d "passed=0&comment=升级检测未通过.\njob details: ${BUILD_URL}console"
-    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/checker/result -d "review_id=${REVIEW_ID}&patch_set=${patch_set}&link=${BUILD_URL}&passed=0"
+    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/test_result/${REVIEW_ID} -d "passed=$result&comment=lava bridge. see details in ${BUILD_URL}console"
+    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/checker/result -d "review_id=${REVIEW_ID}&patch_set=${patch_set}&link=${BUILD_URL}&passed=$result"
 
     if [[ $result != "true" ]]; then
 	exit 1
