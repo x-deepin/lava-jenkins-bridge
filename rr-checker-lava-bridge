@@ -5,6 +5,8 @@
 
 # the caller need pass $CHANGE_LIST in
 
+declare patch_set
+
 function get_changelist()
 {
     wget $1/checkupdate/data.json -q -O - |
@@ -32,6 +34,7 @@ function find_job_files()
 }
 
 ## import RPA, RR_CHECKER_TOKEN,HOST_API,JOB_NAME,REVIEW_ID,BUILD_URL
+## init patch_set
 function setup()
 {
     # $JOB_NAME and $ROOTFS are optional.
@@ -39,11 +42,12 @@ function setup()
     if [[ $RPA == "" || $RR_CHECKER_TOKEN == "" || $HOST_API == "" || $REVIEW_ID == "" || $BUILD_URL == "" ]];then
 	exit -1
     fi
+
+    patch_set=`curl -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/review/${REVIEW_ID}|json_pp|grep latest_patch_set|sed 's/,//'|sed 's/"latest_patch_set" : //g'`
 }
 
 function report_starting_to_rr_deepin_io()
 {
-    patch_set=`curl -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/review/${REVIEW_ID}|json_pp|grep latest_patch_set|sed 's/,//'|sed 's/"latest_patch_set" : //g'`
     curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/checker/launch -d "review_id=${REVIEW_ID}&patch_set=${patch_set}&link=${BUILD_URL}"
 }
 
