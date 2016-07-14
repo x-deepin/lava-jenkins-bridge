@@ -5,6 +5,8 @@
 
 # the caller need pass $CHANGE_LIST in
 
+declare patch_set
+
 function get_changelist()
 {
     wget $1/checkupdate/data.json -q -O - |
@@ -32,6 +34,7 @@ function find_job_files()
 }
 
 ## import RPA, RR_CHECKER_TOKEN,HOST_API,JOB_NAME,REVIEW_ID,BUILD_URL
+## init patch_set
 function setup()
 {
     # $JOB_NAME and $ROOTFS are optional.
@@ -39,6 +42,13 @@ function setup()
     if [[ $RPA == "" || $RR_CHECKER_TOKEN == "" || $HOST_API == "" || $REVIEW_ID == "" || $BUILD_URL == "" ]];then
 	exit -1
     fi
+
+    patch_set=`curl -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/review/${REVIEW_ID}|json_pp|grep latest_patch_set|sed 's/,//'|sed 's/"latest_patch_set" : //g'`
+}
+
+function report_starting_to_rr_deepin_io()
+{
+    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/checker/launch -d "review_id=${REVIEW_ID}&patch_set=${patch_set}&link=${BUILD_URL}"
 }
 
 function submit_lava_job()
@@ -63,7 +73,7 @@ function submit_lava_job()
     return $?
 }
 
-function report_to_rr_deepin_io()
+function report_result_to_rr_deepin_io()
 {
     if [[ $1 == 0 ]]; then
 	result="true"
@@ -71,7 +81,9 @@ function report_to_rr_deepin_io()
 	result="false"
     fi
     set +x  # Must use this to hide the $RR_CHECKER_TOKEN value
-    curl -X POST ${HOST_API}/test_result/${REVIEW_ID} -H "Access-Token: $RR_CHECKER_TOKEN" -d "comment=lava bridge. see details in ${BUILD_URL}/console&passed=$result"
+    #curl -X POST ${HOST_API}/test_result/${REVIEW_ID} -H "Access-Token: $RR_CHECKER_TOKEN" -d "comment=lava bridge. see details in ${BUILD_URL}/console&passed=$result"
+    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/test_result/${REVIEW_ID} -d "passed=$result&comment=lava bridge. see details in ${BUILD_URL}console"
+    curl -X POST -H Access-Token:${RR_CHECKER_TOKEN} ${HOST_API}/checker/result -d "review_id=${REVIEW_ID}&patch_set=${patch_set}&link=${BUILD_URL}&passed=$result"
 
     if [[ $result != "true" ]]; then
 	exit 1
@@ -81,6 +93,8 @@ function report_to_rr_deepin_io()
 
 setup
 
+report_starting_to_rr_deepin_io
+
 submit_lava_job "$JOB_NAME" "$RPA"
 
-report_to_rr_deepin_io $?
+report_result_to_rr_deepin_io $?
