@@ -1,6 +1,6 @@
 #!/bin/bash
 for arg in "$@"; do
     [ "$arg" == "measure_dde_launch_time" ] && exit 0
-fi
+done
 
 exit 1
